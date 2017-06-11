@@ -13,3 +13,14 @@ Application.ScreenUpdating = False
 
 Application.ScreenUpdating = True
 MsgBox ("完成")
+
+'!!!!!!!!!!會有BUG,雙迴圈NEEDED!!!!!!!!!!!!!!!!
+'FOR i to X
+'cell(i,"A")
+    'FOR j to X
+    'IF cell(i,"A") = cell(j,"A") then
+    'cell(i,"A").VALUE = SUM(cell(i,"A"),cell(j,"A")
+    'DELETE cell(j,"A")
+    'END IF
+    'NEXT
+'NEXT
