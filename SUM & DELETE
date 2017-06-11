@@ -17,6 +17,7 @@ MsgBox ("完成")
 '!!!!!!!!!!會有BUG,雙迴圈NEEDED!!!!!!!!!!!!!!!!
 'FOR i to X
 'cell(i,"A")
+j = i+1
     'FOR j to X
     'IF cell(i,"A") = cell(j,"A") then
     'cell(i,"A").VALUE = SUM(cell(i,"A"),cell(j,"A")
