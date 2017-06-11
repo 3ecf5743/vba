@@ -1,0 +1,15 @@
+Dim lastrow As Long, nextcol As Long, lastcol As Long, i As Long
+lastrow = Range("A" & Rows.Count).End(xlUp).Row
+Application.ScreenUpdating = False
+
+    For i = lastrow To 2 Step -1
+        If Cells(i, 1).Value = Cells(i - 1, 1).Value Then
+            nextcol = Cells(i - 1, Columns.Count).End(xlToLeft).Column + 1
+            lastcol = Cells(i, Columns.Count).End(xlToLeft).Column
+            Cells(i - 1, 4).Value = Cells(i - 1, 4) + Cells(i, 4).Value
+            Rows(i).EntireRow.Delete (xlShiftUp)
+        End If
+    Next i
+
+Application.ScreenUpdating = True
+MsgBox ("完成")
