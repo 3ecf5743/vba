@@ -1,0 +1,146 @@
+Sub 巨集1()
+' 巨集1 巨集
+Dim myRng As Range '定義RANGE
+Dim mySht As Worksheet  '定義SHEET
+Dim mySht2 As Worksheet
+Dim mySht3 As Worksheet
+Set mySht = Worksheets(1)   '指定mySht為第一張
+Set myRng = mySht.UsedRange '指定myRng為第一張之使用RANGE
+Dim myLng As Long   '定義myLng為橫長
+myLng = myRng.Rows.Count    '指定myLng長為myRng之橫長
+
+myRng.Copy '複製及貼值
+myRng.PasteSpecial Paste:=xlPasteValues
+
+TEMP1 = "TW" '定義尋找關鍵字
+j = 1 '整理表用之橫長
+For i = 1 To myLng '尋找範圍為第一橫長到最後
+        BB = Application.WorksheetFunction.Sum(mySht.Cells(i, 9).Value, mySht.Cells(i, 10).Value, mySht.Cells(i, 11).Value, mySht.Cells(i, 12).Value)
+        On Error Resume Next
+        If InStr(mySht.Cells(i, 3).Value, TEMP1) And BB > 0 Then '如C攔出現關鍵字則...
+        j = j + 1
+        mySht.Cells(i, 1).Value = "xxx" 'A攔先XXX方便辨識先
+        
+        '拉PO ISSUE DATE到整理表A
+        Worksheets("訂單整理表").Cells(j, 1).Value = CDate(Replace(mySht.Cells(4, 3), ".", "/"))
+        
+        '拉INFO 簡稱到整理表B
+        Worksheets("訂單整理表").Cells(j, 2).Value = "DNTW_" & _
+        Application.WorksheetFunction.VLookup(mySht.Cells(i, 3).Value, Worksheets("INFO").Range("A:G"), 7, 0) & Format(Date, "yymmdd")
+        On Error Resume Next
+
+        Worksheets("訂單整理表").Cells(j, 3).Value = mySht.Cells(i, 2).Value    '拉DNPO NO.到整理表C'
+        Worksheets("訂單整理表").Cells(j, 4).Value = mySht.Cells(i, 3).Value    '拉DNPO 品番.到整理表D'
+        Worksheets("訂單整理表").Cells(j, 5).Value = mySht.Cells(i, 9).Value    '拉DNPO 訂單量.到整理表E
+        
+        '拉INFO LT.到整理表F'
+        Worksheets("訂單整理表").Cells(j, 6).Value = _
+        Application.WorksheetFunction.VLookup(mySht.Cells(i, 3).Value, Worksheets("INFO").Range("A:O"), 15, 0)
+        On Error Resume Next
+        
+        Worksheets("訂單整理表").Cells(j, 7).Value = CDate(Replace(mySht.Cells(i, 8).Value, ".", "/"))  '拉ETA DN.到整理表G'
+        
+        '拉ETD 到整理表H
+        BASEETDDATE = DateAdd("D", Application.WorksheetFunction.VLookup(mySht.Cells(i, 3).Value, Worksheets("INFO").Range("A:S"), 19, 0), Date)
+        F = Weekday(BASEETDDATE, 2) '出港日DATE之周幾
+        G = Application.WorksheetFunction.VLookup(mySht.Cells(i, 3).Value, Worksheets("INFO").Range("A:S"), 17, 0) '周幾出港
+        
+        If F >= G Then
+        Worksheets("訂單整理表").Cells(j, 8).Value = _
+        BASEETDDATE - (7 - F + G)
+        Else
+        Worksheets("訂單整理表").Cells(j, 8).Value = _
+        BASEETDDATE - (G - F)
+        End If
+        '拉N+1+2+3到整理表IJK
+        Worksheets("訂單整理表").Cells(j, 9).Value = mySht.Cells(i, 10).Value
+        Worksheets("訂單整理表").Cells(j, 10).Value = mySht.Cells(i, 11).Value
+        Worksheets("訂單整理表").Cells(j, 11).Value = mySht.Cells(i, 12).Value
+        
+        End If
+Next
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Dim arr() As String
+
+Dim E As Object
+arr = Split("UA;TK;YA;AL;DYG;FI;HF;MX;NSA;NV;VP", ";")
+Set mySht = Worksheets("POFORM")   '指定mySht為POFORM
+Set mySht2 = Worksheets("訂單整理表")
+Set mySht3 = Worksheets("INFO")
+Set myRng = Worksheets("訂單整理表").UsedRange '指定myRng為POFORM之使用RANGE
+myLng = myRng.Rows.Count    '指定myLng長為myRng之橫長
+
+
+mySht2.UsedRange.Copy
+mySht2.UsedRange.PasteSpecial Paste:=xlPasteValues
+mySht.Range("B20:AD100").ClearContents
+
+For Each itm In arr()
+j = 19
+For i = 2 To myLng
+ If InStr(Worksheets("訂單整理表").Cells(i, 2).Value, itm) > 0 Then
+ j = j + 1
+ '表頭
+ mySht.Cells(4, "I").Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:U"), 21, 0)
+ mySht.Cells(5, "I").Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:V"), 22, 0)
+ mySht.Cells(8, "I").Value = Year(Date)
+ mySht.Cells(8, "J").Value = Month(Date)
+ mySht.Cells(8, "K").Value = Day(Date)
+ mySht.Cells(9, "I").Value = Year(Date)
+ mySht.Cells(9, "J").Value = Month(Date)
+ mySht.Cells(10, "I").Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:G"), 7, 0) & Format(Date, "yymmdd") '''''
+ mySht.Cells(j, 2).Value = Year(Date)
+ mySht.Cells(j, 3).Value = Month(Date)
+ mySht.Cells(j, 4).Value = mySht2.Cells(i, 4)
+ mySht.Cells(j, 5).Value = mySht2.Cells(i, 3)
+ mySht.Cells(j, 6).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 2, 0)
+ mySht.Cells(j, 7).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 3, 0)
+ mySht.Cells(j, 8).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 4, 0)
+ mySht.Cells(j, 9).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 5, 0)
+ mySht.Cells(j, 10).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 6, 0)
+ mySht.Cells(j, 11).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 20, 0)
+ mySht.Cells(j, 12).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:U"), 21, 0) 'pic
+ mySht.Cells(j, 13).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 8, 0)
+ mySht.Cells(j, 14).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 9, 0)
+ mySht.Cells(j, 15).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 10, 0)
+ mySht.Cells(j, 16).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 15, 0)
+ mySht.Cells(j, 17).Value = _
+ Application.WorksheetFunction.VLookup(mySht2.Cells(i, 4).Value, mySht3.Range("A:T"), 7, 0) & Format(Date, "yymmdd")
+ mySht.Cells(j, 18).Value = mySht2.Cells(i, 5).Value
+ mySht.Cells(j, 19).Value = mySht2.Cells(i, 9).Value
+ mySht.Cells(j, 20).Value = mySht2.Cells(i, 10).Value
+ mySht.Cells(j, 21).Value = mySht2.Cells(i, 11).Value
+ mySht.Cells(j, 22).Value = mySht2.Cells(i, 7).Value
+ mySht.Cells(j, 23).Value = mySht2.Cells(i, 8).Value
+ End If
+Next
+
+If mySht.Cells(20, 2).Value > 0 Then
+ss = ThisWorkbook.Path
+ChDir ss
+    Sheets("POFORM").Select
+    Sheets("POFORM").Copy
+    ActiveWorkbook.SaveAs Filename:="DNTW_" & mySht.Cells(20, 17).Value & ".xlsx", _
+        FileFormat:=xlOpenXMLWorkbook, CreateBackup:=False
+    ActiveWindow.Close
+End If
+
+mySht.Range("B20:AD100").ClearContents
+Next itm
+
+End Sub
