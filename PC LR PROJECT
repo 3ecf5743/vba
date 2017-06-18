@@ -1,0 +1,33 @@
+Sub 巨集1()
+'
+' 巨集1 巨集
+'
+Set Row = Worksheets("ROW")
+Set ok = Worksheets("OK")
+
+Row.UsedRange.Copy
+ok.Range("A1").PasteSpecial xlPasteAll
+Application.CutCopyMode = False
+ok.Columns("A:C").Delete shift:=xlToLeft
+nowcol = ok.UsedRange.Rows.Count
+
+Application.CutCopyMode = False
+For i = 8 To ok.UsedRange.Rows.Count
+
+    For j = i + 1 To ok.UsedRange.Rows.Count
+
+    If ok.Cells(i, "B") = ok.Cells(j, "B") And ok.Cells(i, "C") = ok.Cells(j, "C") And ok.Cells(i, "D") = ok.Cells(j, "D") Then
+    ok.Cells(i, "AL").Value = ok.Cells(i, "AL").Value + ok.Cells(j, "AL").Value
+    ok.Cells(i, "AO").Value = ok.Cells(i, "AO").Value + ok.Cells(j, "AO").Value
+    ok.Cells(i, "AP").Value = ok.Cells(i, "AP").Value + ok.Cells(j, "AP").Value
+    ok.Cells(i, "AQ").Value = ok.Cells(i, "AQ").Value + ok.Cells(j, "AQ").Value
+    ok.Rows(j).EntireRow.Delete (xlShiftUp)
+    End If
+    
+    Next j
+    
+Next i
+Application.CutCopyMode = True
+
+'
+End Sub
