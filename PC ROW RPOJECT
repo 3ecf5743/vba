@@ -1,0 +1,89 @@
+Sub 巨集3()
+'
+' 巨集3 巨集
+'
+Set pco = Worksheets("PC ORDER")
+Set pcinfo = Worksheets("PC INFO")
+Set Row = Worksheets("ROW")
+Set cy = Worksheets("CY")
+Set ms = Worksheets("MS")
+Set du = Worksheets("DU")
+Set th = Worksheets("TH")
+Set na = Worksheets("NA")
+fulcol = 43
+nowcol = pco.UsedRange.Columns.Count
+addcol = fulcol - nowcol
+Application.ScreenUpdating = False
+
+pco.UsedRange.Copy
+Row.Range("A1").PasteSpecial xlPasteAll
+Application.CutCopyMode = False
+
+
+If addcol > 0 Then '加入欄位補足31天
+For i = 1 To addcol
+With Row.Cells(1, nowcol - 5)
+ .EntireColumn.Insert
+End With
+Next i
+End If
+
+nowcol = Row.UsedRange.Rows.Count '刪除0的資料
+For i = 8 To nowcol
+If Row.Cells(i, "AL") And Row.Cells(i, "AO") And Row.Cells(i, "AP") And Row.Cells(i, "AQ") = 0 Then
+Rows(i).EntireRow.Delete (xlShiftUp)
+End If
+Next i
+
+With Row.Cells(1, 1) '差入3欄準備v
+ .EntireColumn.Insert
+ .EntireColumn.Insert
+ .EntireColumn.Insert
+End With
+Row.Cells(7, "A") = "裁剪場"
+Row.Cells(7, "B") = "鋼場"
+Row.Cells(7, "C") = "備註"
+
+nowcol = Row.UsedRange.Rows.Count '補上鋼廠,CC,備註到ABC
+For i = 8 To nowcol
+If Application.WorksheetFunction.VLookup(Row.Cells(i, "E").Value, pcinfo.Range("B:F"), 3, 0) = True Then
+Row.Cells(i, "A").Value = "NA"
+Else
+Row.Cells(i, "A").Value = _
+Application.WorksheetFunction.VLookup(Row.Cells(i, "E").Value, pcinfo.Range("B:F"), 3, 0)
+End If
+On Error Resume Next
+Row.Cells(i, "B").Value = _
+Application.WorksheetFunction.VLookup(Row.Cells(i, "E").Value, pcinfo.Range("B:F"), 4, 0)
+On Error Resume Next
+Row.Cells(i, "C").Value = _
+Application.WorksheetFunction.VLookup(Row.Cells(i, "E").Value, pcinfo.Range("B:F"), 5, 0)
+On Error Resume Next
+Next i
+
+
+Row.Rows("1:7").Copy '選取第一行
+ms.Range("A1").PasteSpecial
+cy.Range("A1").PasteSpecial
+du.Range("A1").PasteSpecial
+th.Range("A1").PasteSpecial
+na.Range("A1").PasteSpecial
+Application.CutCopyMode = False
+
+Row.Range("A6").AutoFilter field:=1, Criteria1:="C"
+Row.Range("A6").CurrentRegion.Copy cy.Range("A6")
+Row.Range("A6").AutoFilter field:=1, Criteria1:="M"
+Row.Range("A6").CurrentRegion.Copy ms.Range("A6")
+Row.Range("A6").AutoFilter field:=1, Criteria1:="D"
+Row.Range("A6").CurrentRegion.Copy du.Range("A6")
+Row.Range("A6").AutoFilter field:=1, Criteria1:="T"
+Row.Range("A6").CurrentRegion.Copy th.Range("A6")
+Row.Range("A6").AutoFilter field:=1, Criteria1:="NA"
+Row.Range("A6").CurrentRegion.Copy na.Range("A6")
+Row.Range("A6").AutoFilter
+
+
+Application.ScreenUpdating = True
+
+
+End Sub
