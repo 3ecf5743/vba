@@ -1,0 +1,6 @@
+ For i = [A65536].End(xlUp).Row To 1 Step -1
+ If Range("A" & i).Text Like YY Or Range("A" & i).Text Like XX Or Range("A"& i).Text Like ZZ Then
+ Rows(i).Delete
+ END IF
+ NEXT i
+ 
